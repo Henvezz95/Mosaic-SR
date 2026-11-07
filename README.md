@@ -24,6 +24,16 @@ If you find this work useful in your research, please consider citing our paper:
   year={2025}
 }
 ```
+## 🔧 Changelog
+
+**November 2026 — fix in the iterative inference.** With the fix, the released models reproduce the paper's decoding results (M1 only: 3,334 vs 3,330; thresholds (0.13, 0.13): 3,529 vs 3,517; (0.05, 0.07): 3,744 vs 3,714, over 9,562 LR/HR pairs; the small differences are due to the zbar version). `test/test_iterative_processing.py` checks the optimized inference against the aggregate Keras model:
+
+```bash
+python test/test_iterative_processing.py <path/to/aggregate_model.h5>
+```
+
+Dataset building (`buildTFDataset/`) now also accepts both the per-source and the unified BarBeR annotation formats (`QR`/`QR Code`, `DATAMATRIX`/`Data Matrix`, `AZTEC`/`Aztec`), skips regions whose PPE is -1 (number or string), replaces polygons with more than 4 points (curved codes) by their minimum-area rectangle, and gives no crops for images without an annotation entry instead of failing. PyTorch and ONNX are now imported only by the functions that use them.
+
 # 🚀 Getting Started
 ### Repository Structure
 ```graphql

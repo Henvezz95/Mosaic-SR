@@ -8,6 +8,18 @@ import numpy as np
 import sys
 import tensorflow as tf
 
+# 2D symbologies, as named in the per-source BarBeR JSONs and in the unified annotation
+TYPES_2D = {'QR': 'QR', 'DATAMATRIX': 'DATAMATRIX', 'AZTEC': 'AZTEC',
+            'QR Code': 'QR', 'Data Matrix': 'DATAMATRIX', 'Aztec': 'AZTEC'}
+
+def to_quadrilateral(polygon):
+    # The TFRecord readers expect exactly 4 corners; curved codes may be annotated
+    # with more points, so they are replaced by their minimum-area rectangle.
+    if len(polygon) == 4:
+        return polygon
+    rect = cv2.minAreaRect(np.asarray(polygon, dtype=np.float32))
+    return np.round(cv2.boxPoints(rect)).astype(np.int64)
+
 def convert_to_defect_dictionary(json_data, dictionary=None):
     if dictionary is None:
         dictionary = {}
@@ -23,13 +35,15 @@ def convert_to_defect_dictionary(json_data, dictionary=None):
                 area = polygon_area(polygon)
                 ppe = np.sqrt(area/((rows+2)*(cols+2)))
             else:
-                if region['region_attributes']['Type'] not in ['QR', 'DATAMATRIX', 'AZTEC']:
+                if region['region_attributes']['Type'] not in TYPES_2D:
                     continue
-                if region['region_attributes']['PPE'] == '-1':
+                ppe = float(region['region_attributes']['PPE'])
+                if ppe < 0:  # -1 (string or number) means PPE not annotated
                     continue
-                ppe =  float(region['region_attributes']['PPE'])
             
-            regions.append({'polygon': polygon, 'ppe': ppe, 'type':region['region_attributes']['Type']})
+            regions.append({'polygon': to_quadrilateral(polygon), 'ppe': ppe,
+                            'type': TYPES_2D.get(region['region_attributes']['Type'],
+                                                 region['region_attributes']['Type'])})
         dictionary[file_name] = regions
     return dictionary
 

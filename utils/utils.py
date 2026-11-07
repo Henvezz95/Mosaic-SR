@@ -205,6 +205,9 @@ def interativeProcessing(H,W, inputVec, interpreters, th, nch=49):
         start = perf_counter_ns()
         i_vec = indexing(inputVec, list_of_indexes[-1])
         e_vec = indexing(embedding, list_of_indexes[-1])
+        # The mask selects among the patches processed by the previous step, so the
+        # next step must select from this subset, not from the full patch array.
+        inputVec = i_vec
         total_data_time+= (perf_counter_ns()-start)
         start = perf_counter_ns()
         interpreters[i].set_tensor(input_details[0]['index'], i_vec)
