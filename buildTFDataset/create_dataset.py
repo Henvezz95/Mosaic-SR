@@ -105,7 +105,7 @@ if __name__ == "__main__":
             continue
         H,W = img.shape
         file_name = os.path.basename(path)
-        annotation = dictionary[os.path.basename(path)]
+        annotation = dictionary.get(os.path.basename(path), [])  # images without annotation have no crops
         for i in range(len(annotation)):
             polygon = annotation[i]['polygon']
             minn = get_percentile_mask(img, polygon, 5)
@@ -184,7 +184,7 @@ if __name__ == "__main__":
             img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
             H,W = img.shape
             file_name = os.path.basename(path)
-            annotation = dictionary[os.path.basename(path)]
+            annotation = dictionary.get(os.path.basename(path), [])  # images without annotation have no crops
             for i in range(len(annotation)):
                 polygon = annotation[i]['polygon']
                 ttype = annotation[i]['type']

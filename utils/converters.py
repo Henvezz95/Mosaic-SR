@@ -1,9 +1,3 @@
-import torch
-import tensorflow as tf
-import tf2onnx
-import onnx
-from onnx_tf.backend import prepare
-
 import tensorflow as tf 
 from tensorflow.keras.models import  Model
 from tensorflow.keras.layers import  Input, BatchNormalization, Dense, Concatenate
@@ -23,6 +17,9 @@ def keras2tflite(model, input_shape=None, num_threads=1):
     return interpreter
 
 def pytorch2tflite(model, tmp_folder='./tmp/', input_shape=(1,1,96,96), num_threads=1):
+    # imported here so that the Keras/TFLite path does not need PyTorch or ONNX
+    import torch, onnx
+    from onnx_tf.backend import prepare
     sample_input = torch.rand(input_shape)
     torch.onnx.export(
         model,                  # PyTorch Model
@@ -51,6 +48,8 @@ def pytorch2tflite(model, tmp_folder='./tmp/', input_shape=(1,1,96,96), num_thre
     return interpreter
 
 def pytorch2onnx(model, tmp_folder='./tmp/', input_shape=(1,1,96,96)):
+    # imported here so that the Keras/TFLite path does not need PyTorch or ONNX
+    import torch, onnx
     sample_input = torch.rand(input_shape)
     torch.onnx.export(
         model,                  # PyTorch Model
@@ -81,6 +80,8 @@ def keras2onnx(model,
                save_path='./tmp/tmp.onnx', 
                input_shape=(None, None, None, 1), 
                opset=13):
+    # imported here so that the Keras/TFLite path does not need PyTorch or ONNX
+    import tf2onnx, onnx
 
     input_signature = [tf.TensorSpec(shape=input_shape, dtype=tf.float32, name='input')]
 
